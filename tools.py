@@ -12,8 +12,9 @@ import numpy as np
 class quickEda():
 
     """
-    Class Doc 
+    Class Doc is here
     """
+
     def missingAnalysis(self, df,opt):
         pass
 
