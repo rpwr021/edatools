@@ -30,8 +30,8 @@ class QuickEda:
         pass
 
     def check_correlations(self, opts=None):
-        """ find highly correlated feature pairs in data """
+        """ find highly correlated feature pairs in data, threshhold could be optional """
         pass
 
-    def build_plots(self, opts=None):
+    def plot(self, kind=None):
         "yellow"
