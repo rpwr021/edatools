@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 
-class QuickEda:
+class dstools:
 
     """
     Class Doc is here
