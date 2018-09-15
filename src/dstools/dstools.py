@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 
-class dstools:
+class DStools:
 
     """
     Class Doc is here
