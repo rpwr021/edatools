@@ -40,6 +40,7 @@ class QuickEda:
 
     def plot(self, kind=None):
         "yellow"
+        pass
 
     def best_features(self, xfeat, yfeat):
         """return top n features, try regression/logistic model"""
@@ -65,6 +66,8 @@ class QuickEda:
             if xstr.isdigit():
                 return "int"
             else:
+                if self.isdate(xstr):
+                    return "date"
                 return "string"
         return "float"
 
@@ -84,3 +87,6 @@ class QuickEda:
                 self.catfeatures.append(col)
                 data[col] = data[col].astype(str)
         return data
+    
+    def plot_learning_curve(data, clf):
+        pass
