@@ -10,6 +10,7 @@ from collections import defaultdict
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 
 class DStools:
@@ -32,10 +33,26 @@ class DStools:
         """
         pass
 
-    def check_correlations(self, data, numfeatures, t=.90):
+    def check_correlations(self, data, numfeatures, t=.90, plot=True):
         """ find highly correlated feature pairs in data, threshhold could be optional """
         data_cor = data[numfeatures].corr()
         # Set the threshold and add to pairs to list
+
+        if plot:
+            # %matplotlib inline
+            sns.set(rc={'figure.figsize': (5*1.5, 5)})
+
+            mask = np.zeros_like(data_cor, dtype=np.bool)
+            mask[np.triu_indices_from(mask)] = True
+
+            # Set up the matplotlib figure
+            # Generate a custom diverging colormap
+            cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+            # Draw the heatmap with the mask and correct aspect ratio
+            sns.heatmap(data_cor, mask=mask, cmap=cmap, vmax=.7,
+                        center=0, linewidths=.8, cbar_kws={"shrink": .5})
+
         cor_list = []
         # Find Pairs and update cor_list
         for i in range(len(numfeatures)-1):
@@ -45,7 +62,7 @@ class DStools:
 
         if cor_list:
             # Sort by corr coef
-            
+
             sorted_list = sorted(cor_list, key=lambda x: -abs(x[0]))
             for v, i, j in sorted_list:
                 print("%s and %s = %.5f" %
