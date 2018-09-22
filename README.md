@@ -39,9 +39,6 @@ ds = dst()
 data.dtypes
 ```
 
-
-
-
     case_number                   object
     case_received_date            object
     decision_date                 object
@@ -77,6 +74,10 @@ process_dtypes options
 ```python
 features = ds.process_dtypes(data, tapply = False, thr=1000)
 ```
+```python
+ feature  case_number  contains  61613  unique values,  converted to numeric
+ feature  employer_name  contains  17985  unique values, converted to numeric
+```
 
 Data types from CSV after processing 
 <br>
@@ -87,25 +88,23 @@ Data types from CSV after processing
 data.dtypes
 ```
 
-
-
-
-    case_number                   object
-    case_received_date            object
-    decision_date                 object
-    case_status                   object
-    employer_name                 object
-    employer_num_employees       float64
-    employer_yr_established      float64
-    job_education                 object
-    job_experience_num_months    float64
-    job_state                     object
-    job_foreign_lang_req          object
-    job_level                    float64
-    employee_citizenship          object
-    wage_offer                   float64
-    wage_unit                     object
+    case_number                           int32
+    case_received_date           datetime64[ns]
+    decision_date                datetime64[ns]
+    case_status                        category
+    employer_name                         int16
+    employer_num_employees              float64
+    employer_yr_established             float64
+    job_education                      category
+    job_experience_num_months           float64
+    job_state                          category
+    job_foreign_lang_req               category
+    job_level                           float64
+    employee_citizenship               category
+    wage_offer                          float64
+    wage_unit                          category
     dtype: object
+
 
 
 
