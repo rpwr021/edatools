@@ -11,6 +11,8 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from scipy import stats
+from sklearn.preprocessing import RobustScaler, MinMaxScaler
 
 
 class DStools:
@@ -40,7 +42,8 @@ class DStools:
 
         if plot:
             # %matplotlib inline
-            sns.set(rc={'figure.figsize': (5*1.5, 5)})
+            sns.set(rc={'figure.figsize': (
+                len(numfeatures)*1.5, len(numfeatures))})
 
             mask = np.zeros_like(data_cor, dtype=np.bool)
             mask[np.triu_indices_from(mask)] = True
@@ -58,7 +61,7 @@ class DStools:
         for i in range(len(numfeatures)-1):
             for j in range(i+1, len(numfeatures)):
                 if (abs(data_cor.iloc[i, j]) >= t):
-                    cor_list.append([data_cor.iloc[i, j], i+1, j-1])
+                    cor_list.append([data_cor.iloc[i, j], j, i])
 
         if cor_list:
             # Sort by corr coef
@@ -71,9 +74,24 @@ class DStools:
         else:
             print("None of the features have correlation higher than ", t)
 
-    def plot(self, kind=None):
-        "yellow"
-        pass
+    def dist_plots(self, data, numfeatures, scale=True):
+        "Generate dist plots for provided feature vector"
+
+        temp_df = data[numfeatures].fillna(data[numfeatures].median())
+
+        if scale:
+            scaler = MinMaxScaler()
+            scaler.fit(temp_df)
+            temp_df = pd.DataFrame(scaler.transform(
+                temp_df), columns=numfeatures)
+
+        temp_df = temp_df.melt(var_name='feature',  value_name='values')
+
+        graph = sns.FacetGrid(temp_df, col='feature', height=4, aspect=1)
+        graph = (graph.map(sns.distplot, "values", kde=True, rug=False, fit=stats.gamma,
+                   color="green", kde_kws={"color": "r", "lw": 3, "label": "fitted"}))
+        del temp_df
+        return graph
 
     def best_features(self, xfeat, yfeat):
         """return top n features, try regression/logistic model"""
@@ -111,23 +129,32 @@ class DStools:
         """
 
         features = defaultdict(list)
+        n = len(data)
 
         for col, val in data.iloc[3, :].iteritems():
             val = str(val).strip()
             val_type = self._get_dtype(val)
+            unq = data[col].nunique()
 
+            if unq > n*.95:
+                features["skip"].append(col)
+                continue
             try:
                 if(val_type == "int" or val_type == "float"):
-
-                    features["numfeatures"].append(col)
-
-                    if tapply:
-                        if val_type == "int":
-                            data[col] = data[col].astype(np.int64)
-                        elif val_type == 'float':
-                            data[col] = data[col].astype(np.float64)
+                    if unq >= thr:
+                        features["numfeatures"].append(col)
+                        if tapply:
+                            if val_type == "int" and data[col].dtype != 'int':
+                                data[col] = data[col].astype(np.int64)
+                            elif val_type == 'float' and data[col].dtype != 'float':
+                                data[col] = data[col].astype(np.float64)
+                    else:
+                        features["catfeatures"].append(col)
+                        if tapply:
+                            print("feature ", col, " contains ", unq,
+                                  " unique values, converted to categorical encoding")
+                            data[col] = data[col].astype('category')
                 elif val_type == "string":
-                    unq = data[col].nunique()
                     if unq <= thr:
                         features["catfeatures"].append(col)
                         if tapply:
@@ -135,10 +162,10 @@ class DStools:
                     else:
                         if tapply:
                             print("feature ", col, " contains ", unq,
-                                  " unique values, converted to numeric")
+                                  " unique values, converted to numeric encoding")
                             data[col] = data[col].astype('category')
                             data[col] = data[col].cat.codes
-                            features["numfeatures"].append(col)
+                            features["encoded"].append(col)
                         else:
                             features["catfeatures"].append(col)
 

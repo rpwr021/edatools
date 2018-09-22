@@ -4,3 +4,4 @@ src/dstools/__pycache__/__init__.cpython-36.pyc
 src/dstools/__pycache__/dstools.cpython-36.pyc
 tests/sample_dataset/.ipynb_checkpoints/auto-mpg-checkpoint.data
 tests/sample_dataset/.ipynb_checkpoints/dev_dataset-checkpoint.csv
+
