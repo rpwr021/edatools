@@ -1,31 +1,53 @@
 
+
 ```python
+import warnings
+import pandas as pd
+import numpy as np
+from sys import path
+
+path.append('../src')
 from dstools.dstools import DStools as dst
+
+warnings.filterwarnings("ignore")
 ```
 
 
 ```python
-data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
+"""data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
                    names=[ 'mpg','cylinders','displacement','horsepower','weight','acceleration','year','origin','name'], \
                    na_values='?')
-#data =  pd.read_csv("./sample_dataset/wages_data_iso8859.csv", encoding='ISO-8859-1')
+"""
+
+data =  pd.read_csv("./sample_dataset/wages_data_iso8859.csv", encoding='ISO-8859-1')
 ds = dst()
 ```
 
 * Data types from CSV before processing 
 
+
 ```python
 data.dtypes
 ```
-    mpg             float64
-    cylinders         int64
-    displacement    float64
-    horsepower      float64
-    weight          float64
-    acceleration    float64
-    year              int64
-    origin            int64
-    name             object
+
+
+
+
+    case_number                   object
+    case_received_date            object
+    decision_date                 object
+    case_status                   object
+    employer_name                 object
+    employer_num_employees       float64
+    employer_yr_established      float64
+    job_education                 object
+    job_experience_num_months    float64
+    job_state                     object
+    job_foreign_lang_req          object
+    job_level                    float64
+    employee_citizenship          object
+    wage_offer                   float64
+    wage_unit                     object
     dtype: object
 
 
@@ -48,10 +70,10 @@ process_dtypes options
 features = ds.process_dtypes(data, tapply = True, thr=30)
 ```
 
-    feature  cylinders  contains  5  unique values, converted to categorical encoding
-    feature  year  contains  13  unique values, converted to categorical encoding
-    feature  origin  contains  3  unique values, converted to categorical encoding
-    feature  name  contains  305  unique values, converted to numeric encoding
+    feature  employer_name  contains  17985  unique values, converted to numeric encoding
+    feature  job_state  contains  57  unique values, converted to numeric encoding
+    feature  job_level  contains  4  unique values, converted to categorical encoding
+    feature  employee_citizenship  contains  176  unique values, converted to numeric encoding
 
 
 * Data types from CSV after processing 
@@ -63,44 +85,86 @@ features = ds.process_dtypes(data, tapply = True, thr=30)
 data.dtypes
 ```
 
-    mpg              float64
-    cylinders       category
-    displacement     float64
-    horsepower       float64
-    weight           float64
-    acceleration     float64
-    year            category
-    origin          category
-    name               int16
+
+
+
+    case_number                          object
+    case_received_date           datetime64[ns]
+    decision_date                datetime64[ns]
+    case_status                        category
+    employer_name                         int16
+    employer_num_employees              float64
+    employer_yr_established             float64
+    job_education                      category
+    job_experience_num_months           float64
+    job_state                              int8
+    job_foreign_lang_req               category
+    job_level                          category
+    employee_citizenship                  int16
+    wage_offer                          float64
+    wage_unit                          category
     dtype: object
 
 
 
-* Process dtype returns a dictionary of features, keyed according to their type
+Process dtype returns a dictionary of features, keyed according to their type. 
+ - skip: feature that has vary low variance, such as index columns etc
+ - encode: features that do not fit well in numercal due to low number of unique values and should be encoded
+ - dtfeatures: temporal features such as date 
 
 
 ```python
 features
 ```
 
+
+
+
     defaultdict(list,
-                {'numfeatures': ['mpg',
-                  'displacement',
-                  'horsepower',
-                  'weight',
-                  'acceleration'],
-                 'catfeatures': ['cylinders', 'year', 'origin'],
-                 'encoded': ['name']})
+                {'skip': ['case_number'],
+                 'dtfeatures': ['case_received_date', 'decision_date'],
+                 'catfeatures': ['case_status',
+                  'job_education',
+                  'job_foreign_lang_req',
+                  'job_level',
+                  'wage_unit'],
+                 'encode': ['employer_name', 'job_state', 'employee_citizenship'],
+                 'numfeatures': ['employer_num_employees',
+                  'employer_yr_established',
+                  'job_experience_num_months',
+                  'wage_offer']})
 
 
-* To analyze a list of features at a glance, the dist_plots method can be used. It generates density plots(green) along with approximated distribution (red) for a given feature
+
+To analyze a range of continuous features at a glance, the dist_plots method can be used. It generates density plots(green) along with approximated distribution (red) for a given feature
 
 
 ```python
 ds.dist_plots(data, features.get('numfeatures'), scale=True)
 ```
 
-![png](output_11_1.png)
+
+![png](output_11_0.png)
+
+
+Similarly for categorical features, count plots can be generated for a list of features (the features dictionary generated above comes in handy here). Optionally, a xhue option can be passed to generate count plots that consider another categorical feature.
+
+
+```python
+ds.count_plots(data, features.get('catfeatures'))
+```
+
+
+![png](output_13_0.png)
+
+
+
+```python
+ds.count_plots(data, features.get('catfeatures').copy(), xhue="job_level")
+```
+
+
+![png](output_14_0.png)
 
 
 * A Quick way to find out highly correlated pairs in data,  t controls the boundry correlation threshold to filter the features
@@ -111,10 +175,9 @@ ds.dist_plots(data, features.get('numfeatures'), scale=True)
 ds.check_correlations(data, features.get("numfeatures"), t=0.8, plot=True)
 ```
 
-    weight and displacement = 0.93282
-    horsepower and displacement = 0.89726
-    weight and horsepower = 0.86454
-    weight and mpg = -0.83174
-    displacement and mpg = -0.80420
+    None of the features have correlation higher than  0.8
 
-![png](output_13_2.png)
+
+
+![png](output_16_1.png)
+

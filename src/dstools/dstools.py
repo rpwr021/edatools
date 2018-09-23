@@ -8,11 +8,12 @@ Created on Fri Feb  2 15:59:42 2018
 import re
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats
-from sklearn.preprocessing import RobustScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, RobustScaler
 
 
 class DStools:
@@ -35,7 +36,8 @@ class DStools:
         """
         pass
 
-    def check_correlations(self, data, numfeatures, t=.90, plot=True):
+    @staticmethod
+    def check_correlations(data, numfeatures, t=.90, plot=True):
         """ find highly correlated feature pairs in data, threshhold could be optional """
         data_cor = data[numfeatures].corr()
         # Set the threshold and add to pairs to list
@@ -65,18 +67,17 @@ class DStools:
 
         if cor_list:
             # Sort by corr coef
-
             sorted_list = sorted(cor_list, key=lambda x: -abs(x[0]))
             for v, i, j in sorted_list:
                 print("%s and %s = %.5f" %
                       (numfeatures[:][i], numfeatures[:][j], v))
-            return sorted_list
         else:
             print("None of the features have correlation higher than ", t)
 
-    def dist_plots(self, data, numfeatures, scale=True):
+    @staticmethod
+    def dist_plots(data, numfeatures, scale=True):
         "Generate dist plots for provided feature vector"
-
+        sns.set(font_scale=1)
         temp_df = data[numfeatures].fillna(data[numfeatures].median())
 
         if scale:
@@ -89,9 +90,31 @@ class DStools:
 
         graph = sns.FacetGrid(temp_df, col='feature', height=4, aspect=1)
         graph = (graph.map(sns.distplot, "values", kde=True, rug=False, fit=stats.gamma,
-                   color="green", kde_kws={"color": "r", "lw": 3, "label": "fitted"}))
+                           color="green", kde_kws={"color": "r", "lw": 3, "label": "fitted"}))
         del temp_df
-        return graph
+
+    @staticmethod
+    def count_plots(data, catfeatures, xhue=None):
+        "Generate conut plots for provided feature vector"
+        tmp_df = data[catfeatures].copy()
+        plt.figure(figsize=(len(catfeatures)*7, len(catfeatures)*7*.75))
+        sns.set(font_scale=1.5)
+        if xhue:
+            catfeatures.remove(xhue)
+        for i, col in enumerate(catfeatures):
+
+            plt.subplot(len(catfeatures), 3, i+1)
+            if xhue:
+                sns.countplot(x=col, data=tmp_df, palette="Set2", hue=xhue,
+                              order=data[col].value_counts().index).set(xlabel=col)
+            else:
+                sns.countplot(x=col, data=tmp_df, palette="Set2",
+                              order=data[col].value_counts().index).set(xlabel=col)
+
+        plt.tight_layout()
+        plt.show()
+        plt.clf()
+        plt.close('all')
 
     def best_features(self, xfeat, yfeat):
         """return top n features, try regression/logistic model"""
@@ -165,9 +188,9 @@ class DStools:
                                   " unique values, converted to numeric encoding")
                             data[col] = data[col].astype('category')
                             data[col] = data[col].cat.codes
-                            features["encoded"].append(col)
+                            features["encode"].append(col)
                         else:
-                            features["catfeatures"].append(col)
+                            features["encode"].append(col)
 
                 elif val_type == "date":
                     features["dtfeatures"].append(col)
