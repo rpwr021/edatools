@@ -97,13 +97,21 @@ class DStools:
     def count_plots(data, catfeatures, xhue=None):
         "Generate conut plots for provided feature vector"
         tmp_df = data[catfeatures].copy()
-        plt.figure(figsize=(len(catfeatures)*7, len(catfeatures)*7*.75))
         sns.set(font_scale=1.5)
         if xhue:
-            catfeatures.remove(xhue)
-        for i, col in enumerate(catfeatures):
+            if xhue in catfeatures:
+                catfeatures.remove(xhue)
+            else:
+                raise ValueError(
+                    "xhue should be present in the list of input features")
 
-            plt.subplot(len(catfeatures), 3, i+1)
+        plt.figure(figsize=(len(catfeatures)*7, len(catfeatures)*7*.75))
+
+        for i, col in enumerate(catfeatures):
+            if len(catfeatures) < 3:
+                plt.subplot(len(catfeatures), len(catfeatures), i+1)
+            else:
+                plt.subplot(len(catfeatures), 3, i+1)
             if xhue:
                 sns.countplot(x=col, data=tmp_df, palette="Set2", hue=xhue,
                               order=data[col].value_counts().index).set(xlabel=col)
