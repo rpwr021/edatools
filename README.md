@@ -30,9 +30,6 @@ ds = dst()
 data.dtypes
 ```
 
-
-
-
     mpg             float64
     cylinders         int64
     displacement    float64
@@ -79,9 +76,6 @@ features = ds.process_dtypes(data, tapply = True, thr=30)
 data.dtypes
 ```
 
-
-
-
     mpg              float64
     cylinders       category
     displacement     float64
@@ -104,19 +98,17 @@ Process dtype returns a dictionary of features, keyed according to their type.
 ```python
 features
 ```
-
-
-
+```JSON
 
     defaultdict(list,
-                {'numfeatures': ['mpg',
+                {"numfeatures": ['mpg',
                   'displacement',
                   'horsepower',
                   'weight',
                   'acceleration'],
-                 'catfeatures': ['cylinders', 'year', 'origin'],
-                 'encode': ['name']})
-
+                 "catfeatures": ['cylinders', 'year', 'origin'],
+                 "encode": ['name']})
+```
 
 
 To analyze a range of continuous features at a glance, the dist_plots method can be used. It generates density plots(green) along with approximated distribution (red) for a given feature
@@ -156,13 +148,10 @@ ds.count_plots(data, features.get('catfeatures').copy(), xhue="origin")
 ```python
 ds.check_correlations(data, features.get("numfeatures"), t=0.8, plot=True)
 ```
-
     weight and displacement = 0.93282
     horsepower and displacement = 0.89726
     weight and horsepower = 0.86454
     weight and mpg = -0.83174
     displacement and mpg = -0.80420
-
-
 
 ![png](./testing/output_16_1.png)
