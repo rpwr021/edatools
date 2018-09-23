@@ -14,8 +14,6 @@ A toolkit to help with everyday data science tasks.
 ```python
 from dstools.dstools import DStools as dst
 ```
-
-
 ```python
 data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
                    names=[ 'mpg','cylinders','displacement','horsepower','weight','acceleration','year','origin','name'], \
@@ -32,6 +30,9 @@ ds = dst()
 data.dtypes
 ```
 
+
+
+
     mpg             float64
     cylinders         int64
     displacement    float64
@@ -42,6 +43,7 @@ data.dtypes
     origin            int64
     name             object
     dtype: object
+
 
 
 * Seperating numerical/categorical/temporal features and applying datatypes to dataframe
@@ -77,6 +79,9 @@ features = ds.process_dtypes(data, tapply = True, thr=30)
 data.dtypes
 ```
 
+
+
+
     mpg              float64
     cylinders       category
     displacement     float64
@@ -89,6 +94,7 @@ data.dtypes
     dtype: object
 
 
+
 Process dtype returns a dictionary of features, keyed according to their type. 
  - skip: feature that has vary low variance, such as index columns etc
  - encode: features that do not fit well in numercal due to low number of unique values and should be encoded
@@ -98,6 +104,9 @@ Process dtype returns a dictionary of features, keyed according to their type.
 ```python
 features
 ```
+
+
+
 
     defaultdict(list,
                 {'numfeatures': ['mpg',
@@ -117,8 +126,8 @@ To analyze a range of continuous features at a glance, the dist_plots method can
 ds.dist_plots(data, features.get('numfeatures'), scale=True)
 ```
 
-![png](./testing/output_11_0.png)
 
+![png](testing/output_11_0.png)
 
 Similarly for categorical features, count plots can be generated for a list of features (the features dictionary generated above comes in handy here). Optionally, a xhue option can be passed to generate count plots that consider another categorical feature.
 
@@ -127,12 +136,15 @@ Similarly for categorical features, count plots can be generated for a list of f
 ds.count_plots(data, features.get('catfeatures'))
 ```
 
+
 ![png](./testing/output_13_0.png)
+
 
 
 ```python
 ds.count_plots(data, features.get('catfeatures').copy(), xhue="origin")
 ```
+
 
 ![png](./testing/output_14_0.png)
 
@@ -150,6 +162,7 @@ ds.check_correlations(data, features.get("numfeatures"), t=0.8, plot=True)
     weight and horsepower = 0.86454
     weight and mpg = -0.83174
     displacement and mpg = -0.80420
+
 
 
 ![png](./testing/output_16_1.png)
