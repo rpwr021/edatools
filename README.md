@@ -133,7 +133,7 @@ ds.dist_plots(data, features.get('numfeatures'), scale=True)
 ```
 
 
-![png](./testing/output_11_0.png)
+![png](./testing/output_11_1.png)
 
 
 Similarly for categorical features, count plots can be generated for a list of features (the features dictionary generated above comes in handy here). Optionally, a xhue option can be passed to generate count plots that consider another categorical feature.
