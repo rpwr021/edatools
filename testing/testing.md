@@ -22,6 +22,18 @@ data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
 ds = dst()
 ```
 
+
+```python
+ds.count_plots
+```
+
+
+
+
+    <function dstools.dstools.DStools.count_plots(data, catfeatures, xhue=None)>
+
+
+
 * Data types from CSV before processing 
 
 
@@ -126,7 +138,7 @@ ds.dist_plots(data, features.get('numfeatures'), scale=True)
 ```
 
 
-![png](output_11_0.png)
+![png](output_12_0.png)
 
 
 Similarly for categorical features, count plots can be generated for a list of features (the features dictionary generated above comes in handy here). Optionally, a xhue option can be passed to generate count plots that consider another categorical feature.
@@ -137,16 +149,16 @@ ds.count_plots(data, features.get('catfeatures'))
 ```
 
 
-![png](output_13_0.png)
+![png](output_14_0.png)
 
 
 
 ```python
-ds.count_plots(data, features.get('catfeatures').copy(), xhue="origin")
+ds.count_plots(data, features.get('catfeatures').copy(), features.get('catfeatures').copy()[0])
 ```
 
 
-![png](output_14_0.png)
+![png](output_15_0.png)
 
 
 * A Quick way to find out highly correlated pairs in data,  t controls the boundry correlation threshold to filter the features
@@ -165,5 +177,41 @@ ds.check_correlations(data, features.get("numfeatures"), t=0.8, plot=True)
 
 
 
-![png](output_16_1.png)
+![png](output_17_1.png)
+
+
+
+```python
+a, b = dst.processOutliers(data[features.get('numfeatures')], plot=True, transform=True)
+```
+
+    ____mpg____                        
+    	 lower outlier bound -7.80, upper bound 54.30  :::  number of outliers 0                        
+    	 skew for distribution 0.46
+    ____displacement____                        
+    	 lower outlier bound -242.80, upper bound 609.05  :::  number of outliers 0                        
+    	 skew for distribution 0.72
+    ____horsepower____                        
+    	 lower outlier bound -37.20, upper bound 238.20  :::  number of outliers 6                        
+    	 skew for distribution 1.09
+    ____weight____                        
+    	 lower outlier bound -821.60, upper bound 6653.35  :::  number of outliers 0                        
+    	 skew for distribution 0.53
+    ____acceleration____                        
+    	 lower outlier bound 6.46, upper bound 24.54  :::  number of outliers 2                        
+    	 skew for distribution 0.28
+    
+    Total Number of outliers: 8
+    Original shape of data: (398, 5)
+    New shape of data: (390, 5)
+    
+     Distribution plots before and Distribution plots After skew adjustment and outlier changes
+
+
+
+![png](output_18_1.png)
+
+
+
+![png](output_18_2.png)
 
