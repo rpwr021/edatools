@@ -12,24 +12,25 @@ A toolkit to help with everyday data science tasks.
 ### Code Snippets
 
 ```python
+path.append('../src')
 from dstools.dstools import DStools as dst
+warnings.filterwarnings("ignore")
 ```
+
+
 ```python
 data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
                    names=[ 'mpg','cylinders','displacement','horsepower','weight','acceleration','year','origin','name'], \
                    na_values='?')
-
 #data =  pd.read_csv("./sample_dataset/wages_data_iso8859.csv", encoding='ISO-8859-1')
 ds = dst()
 ```
 
 * Data types from CSV before processing 
 
-
 ```python
 data.dtypes
 ```
-
     mpg             float64
     cylinders         int64
     displacement    float64
@@ -43,9 +44,7 @@ data.dtypes
 
 
 
-* Seperating numerical/categorical/temporal features and applying datatypes to dataframe
-
-
+### Seperating numerical/categorical/temporal features and applying datatypes to dataframe
 <br>
 process_dtypes options 
 <br>
@@ -67,15 +66,14 @@ features = ds.process_dtypes(data, tapply = True, thr=30)
     feature  name  contains  305  unique values, converted to numeric encoding
 
 
-* Data types from CSV after processing 
+Data types from CSV after processing 
 <br>
--Notice datetime and category updates to fetures
+-Notice datetime and category updates to features
 
 
 ```python
 data.dtypes
 ```
-
     mpg              float64
     cylinders       category
     displacement     float64
@@ -98,17 +96,22 @@ Process dtype returns a dictionary of features, keyed according to their type.
 ```python
 features
 ```
-```Javascript
+
+
+
+
     defaultdict(list,
                 {'numfeatures': ['mpg',
                   'displacement',
                   'horsepower',
                   'weight',
                   'acceleration'],
-                  'catfeatures': ['cylinders', 'year', 'origin'],
-                  'encode': ['name']})
-```
+                 'catfeatures': ['cylinders', 'year', 'origin'],
+                 'encode': ['name']})
 
+
+
+### Distribution kde plots with approximated distribution
 
 To analyze a range of continuous features at a glance, the dist_plots method can be used. It generates density plots(green) along with approximated distribution (red) for a given feature
 
@@ -118,7 +121,10 @@ ds.dist_plots(data, features.get('numfeatures'), scale=True)
 ```
 
 
-![png](testing/output_11_0.png)
+![png](./testing/output_11_0.png)
+
+
+### Count plots, with conditional plotting 
 
 Similarly for categorical features, count plots can be generated for a list of features (the features dictionary generated above comes in handy here). Optionally, a xhue option can be passed to generate count plots that consider another categorical feature.
 
@@ -133,13 +139,14 @@ ds.count_plots(data, features.get('catfeatures'))
 
 
 ```python
-ds.count_plots(data, features.get('catfeatures').copy(), xhue="origin")
+ds.count_plots(data, features.get('catfeatures').copy(), features.get('catfeatures').copy()[0])
 ```
 
 
 ![png](./testing/output_14_0.png)
 
 
+### Correlation plot with threshold based identification of highly correlated features
 * A Quick way to find out highly correlated pairs in data,  t controls the boundry correlation threshold to filter the features
 <br> and generates a sns themed plot 
 
@@ -154,7 +161,17 @@ ds.check_correlations(data, features.get("numfeatures"), t=0.8, plot=True)
     weight and mpg = -0.83174
     displacement and mpg = -0.80420
 
+
+
 ![png](./testing/output_16_1.png)
+
+
+### Detect outliers and adjust distribution skew 
+
+- processOutliers accepts a dataframe of with continuous feature, finds outliers based on IQR range 
+- for positive/right skew log transformation is applied
+- for negative/left skew exponential transformation is applied
+- the function returns outliers dataframe and cleaned up dataframe
 
 
 ```python
@@ -186,7 +203,5 @@ a, b = dst.processOutliers(data[features.get('numfeatures')], plot=True, transfo
 
 
 ![png](./testing/output_18_1.png)
-
-
 
 ![png](./testing/output_18_2.png)
