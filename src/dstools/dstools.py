@@ -3,6 +3,7 @@ Created on Fri Feb  2 15:59:42 2018
 
 @author: raz
 """
+import itertools
 import re
 from collections import defaultdict
 
@@ -116,7 +117,7 @@ class DStools:
         plt.clf()
         plt.close('all')
 
-    def best_features(self, xfeat, yfeat):
+    def best_features(self, data, xfeat, yfeat):
         """return top n features, try regression/logistic model"""
         pass
 
@@ -147,7 +148,7 @@ class DStools:
         else:
             return "string"
 
-    def process_dtypes(self, data, tapply=False, thr=10 ):
+    def process_dtypes(self, data, tapply=False, thr=10):
         """read data, and assign data types accordingly
             tapply = transform dataframe/apply data types learnt
             thr = threshold beyond which a feature should be encoded to numeric instead of category
@@ -208,5 +209,90 @@ class DStools:
 
         return features
 
-    def plot_learning_curve(self, data, clf):
-        pass
+    @staticmethod
+    def processOutliers(xdata, transform=True, plot=True):
+        """
+        Data frame is expeced to be containing numeric columns
+        Detect, list and optionally remove outliers for a given data frame.
+        Scale dataframe given.
+        """
+
+        outliers_lst = set()
+        log_data = xdata.copy()
+        log_data = log_data.fillna(np.median(log_data))
+        odf = pd.DataFrame()
+        samples = len(log_data)
+
+        # For each feature find the data points with extreme high or low values
+        for feature in log_data.columns:
+
+            nans = xdata[feature].isna().sum()/samples
+
+            pdwn = xdata.loc[:, feature].describe()[4]
+            pup = xdata.loc[:, feature].describe()[6]
+            # Using the interquartile range to calculate an outlier step (2.2 times the interquartile range)
+            step = 2.2 * (pup - pdwn)  # IQR * 2.2
+
+            #pdwn = np.percentile(log_data.loc[:, feature], 25)
+            #pup = np.percentile(log_data.loc[:, feature], 75)
+
+            if nans > .33:
+                print(ValueError("\n *** Too many (33% >) NA values in {}\
+                                \n Default median imputation will bias the data ***".format(feature)))
+                step = (2.2+nans) * (pup - pdwn)  # IQR * 2.2
+
+            # The tilde sign ~ means not
+            # So here, we're finding any points outside of Q1 - step and Q3 + step
+            outliers_rows = pd.DataFrame(log_data.loc[~(
+                (log_data[feature] >= pdwn - step) & (log_data[feature] <= pup + step)), :])
+
+            outliers_lst.update(list(outliers_rows.index))
+
+            skew = log_data[feature].skew()
+
+            if transform and skew > 0.6:
+                log_data[feature] += np.e**-8
+                log_data[feature] = np.log(log_data[feature])
+            elif transform and skew < -0.6:
+                #log_data[feature] += np.e**-8
+                log_data[feature] = log_data[feature]**2
+
+            print("____{}____\
+                        \n\t lower outlier bound {:.2f}, upper bound {:.2f}  :::  number of outliers {}\
+                        \n\t skew for distribution {:.2f}".format(feature, pdwn-step, pup+step, outliers_rows.shape[0], skew)
+                  )
+
+        #outliers = list(itertools.chain.from_iterable(outliers_lst))
+        outliers_lst = list(outliers_lst)
+
+        if len(outliers_lst) == samples:
+
+            if plot:
+                print("\n Distribution plots before and after skew adjustment changes")
+                DStools.dist_plots(xdata, xdata.columns)
+                DStools.dist_plots(log_data, log_data.columns)
+
+            return log_data, _
+            # List of duplicate outliers
+        else:
+            print('\nTotal Number of outliers: {}'.format(len(outliers_lst)))
+
+            odf = log_data.iloc[outliers_lst, :]
+
+            # Remove duplicate outliers
+            # Only 5 specified
+            processed_df = log_data.drop(
+                log_data.index[outliers_lst]).reset_index(drop=True)
+
+            # Original Data
+            print('Original shape of data: {}'.format(xdata.shape))
+            # Processed Data
+            print('New shape of data: {}'.format(processed_df.shape))
+
+            if plot:
+                print(
+                    "\n Distribution plots before and Distribution plots After skew adjustment and outlier changes")
+                DStools.dist_plots(xdata, xdata.columns)
+                DStools.dist_plots(processed_df, processed_df.columns)
+
+            return processed_df, odf

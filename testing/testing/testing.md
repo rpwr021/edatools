@@ -1,19 +1,18 @@
-# dstools
-A toolkit to help with everyday data science tasks. 
 
-### Examples
-
-* Seperating categorical, continuous and date features. Optionally apply type changes.
-* Flag features with high correlation, low variance etc. 
-* Plotting - generate distribution plots, flag skew
-* Generate learning curves, threshold optimization
-* Generate feature importance graphs
-
-### Code Snippets
 
 ```python
+import warnings
+import pandas as pd
+import numpy as np
+from sys import path
+
+path.append('../src')
 from dstools.dstools import DStools as dst
+
+warnings.filterwarnings("ignore")
 ```
+
+
 ```python
 data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
                    names=[ 'mpg','cylinders','displacement','horsepower','weight','acceleration','year','origin','name'], \
@@ -23,12 +22,27 @@ data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
 ds = dst()
 ```
 
+
+```python
+ds.count_plots
+```
+
+
+
+
+    <function dstools.dstools.DStools.count_plots(data, catfeatures, xhue=None)>
+
+
+
 * Data types from CSV before processing 
 
 
 ```python
 data.dtypes
 ```
+
+
+
 
     mpg             float64
     cylinders         int64
@@ -76,6 +90,9 @@ features = ds.process_dtypes(data, tapply = True, thr=30)
 data.dtypes
 ```
 
+
+
+
     mpg              float64
     cylinders       category
     displacement     float64
@@ -98,16 +115,19 @@ Process dtype returns a dictionary of features, keyed according to their type.
 ```python
 features
 ```
-```Javascript
+
+
+
+
     defaultdict(list,
                 {'numfeatures': ['mpg',
                   'displacement',
                   'horsepower',
                   'weight',
                   'acceleration'],
-                  'catfeatures': ['cylinders', 'year', 'origin'],
-                  'encode': ['name']})
-```
+                 'catfeatures': ['cylinders', 'year', 'origin'],
+                 'encode': ['name']})
+
 
 
 To analyze a range of continuous features at a glance, the dist_plots method can be used. It generates density plots(green) along with approximated distribution (red) for a given feature
@@ -118,7 +138,8 @@ ds.dist_plots(data, features.get('numfeatures'), scale=True)
 ```
 
 
-![png](testing/output_11_0.png)
+![png](output_12_0.png)
+
 
 Similarly for categorical features, count plots can be generated for a list of features (the features dictionary generated above comes in handy here). Optionally, a xhue option can be passed to generate count plots that consider another categorical feature.
 
@@ -128,16 +149,16 @@ ds.count_plots(data, features.get('catfeatures'))
 ```
 
 
-![png](./testing/output_13_0.png)
+![png](output_14_0.png)
 
 
 
 ```python
-ds.count_plots(data, features.get('catfeatures').copy(), xhue="origin")
+ds.count_plots(data, features.get('catfeatures').copy(), features.get('catfeatures').copy()[0])
 ```
 
 
-![png](./testing/output_14_0.png)
+![png](output_15_0.png)
 
 
 * A Quick way to find out highly correlated pairs in data,  t controls the boundry correlation threshold to filter the features
@@ -154,7 +175,10 @@ ds.check_correlations(data, features.get("numfeatures"), t=0.8, plot=True)
     weight and mpg = -0.83174
     displacement and mpg = -0.80420
 
-![png](./testing/output_16_1.png)
+
+
+![png](output_17_1.png)
+
 
 
 ```python
@@ -185,8 +209,9 @@ a, b = dst.processOutliers(data[features.get('numfeatures')], plot=True, transfo
 
 
 
-![png](./testing/output_18_1.png)
+![png](output_18_1.png)
 
 
 
-![png](./testing/output_18_2.png)
+![png](output_18_2.png)
+
