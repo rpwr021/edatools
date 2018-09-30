@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Fri Feb  2 15:59:42 2018
 
@@ -19,7 +17,7 @@ from sklearn.preprocessing import MinMaxScaler, RobustScaler
 class DStools:
 
     """
-    Class Doc is here
+    Generic tools, most useful for eda! Modeling tools go in other two classes
     """
 
     def __init__(self):
@@ -28,12 +26,6 @@ class DStools:
 
     def missing_analysis(self, opts=None):
         """ find missing data for each feature"""
-        pass
-
-    def feature_types(self, cat_level):
-        """ seperate categorical and continuous features, optionally use a
-        threshold value to separate categorical from continuous
-        """
         pass
 
     @staticmethod
@@ -155,8 +147,11 @@ class DStools:
         else:
             return "string"
 
-    def process_dtypes(self, data, tapply=False, thr=10):
+    def process_dtypes(self, data, tapply=False, thr=10 ):
         """read data, and assign data types accordingly
+            tapply = transform dataframe/apply data types learnt
+            thr = threshold beyond which a feature should be encoded to numeric instead of category
+
         """
 
         features = defaultdict(list)
@@ -172,33 +167,34 @@ class DStools:
                 continue
             try:
                 if(val_type == "int" or val_type == "float"):
-                    if unq >= thr:
+                    if unq >= thr and tapply:
                         features["numfeatures"].append(col)
-                        if tapply:
-                            if val_type == "int" and data[col].dtype != 'int':
-                                data[col] = data[col].astype(np.int64)
-                            elif val_type == 'float' and data[col].dtype != 'float':
-                                data[col] = data[col].astype(np.float64)
+                        if val_type == "int" and data[col].dtype != 'int':
+                            data[col] = data[col].astype(np.int64)
+                        elif val_type == 'float' and data[col].dtype != 'float':
+                            data[col] = data[col].astype(np.float64)
+                    elif unq >= thr and not tapply:
+                        features["numfeatures"].append(col)
+                    elif unq <= thr and tapply:
+                        features["catfeatures"].append(col)
+                        print("feature ", col, " contains ", unq,
+                              " unique values, converted to categorical encoding")
+                        data[col] = data[col].astype('category')
                     else:
                         features["catfeatures"].append(col)
-                        if tapply:
-                            print("feature ", col, " contains ", unq,
-                                  " unique values, converted to categorical encoding")
-                            data[col] = data[col].astype('category')
+
                 elif val_type == "string":
-                    if unq <= thr:
+                    if unq <= thr and tapply:
                         features["catfeatures"].append(col)
-                        if tapply:
-                            data[col] = data[col].astype('category')
+                        data[col] = data[col].astype('category')
+                    elif unq >= thr and tapply:
+                        print("feature ", col, " contains ", unq,
+                              " unique values, converted to numeric encoding")
+                        data[col] = data[col].astype('category')
+                        data[col] = data[col].cat.codes
+                        features["encode"].append(col)
                     else:
-                        if tapply:
-                            print("feature ", col, " contains ", unq,
-                                  " unique values, converted to numeric encoding")
-                            data[col] = data[col].astype('category')
-                            data[col] = data[col].cat.codes
-                            features["encode"].append(col)
-                        else:
-                            features["encode"].append(col)
+                        features["encode"].append(col)
 
                 elif val_type == "date":
                     features["dtfeatures"].append(col)
