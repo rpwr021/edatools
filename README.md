@@ -175,7 +175,7 @@ ds.check_correlations(data, features.get("numfeatures"), t=0.8, plot=True)
 
 
 ```python
-a, b = dst.processOutliers(data[features.get('numfeatures')], plot=True, transform=True)
+cleaned_df, outliers = dst.processOutliers(data[features.get('numfeatures')], plot=True, transform=True)
 ```
 
     ____mpg____                        
