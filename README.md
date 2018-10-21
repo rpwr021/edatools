@@ -1,4 +1,4 @@
-# dstools
+# edatools
 A toolkit to help with everyday data science tasks. 
 
 ### Examples
@@ -13,7 +13,7 @@ A toolkit to help with everyday data science tasks.
 
 ```python
 path.append('../src')
-from dstools.dstools import DStools as dst
+from edatools.edatools import DStools as dst
 warnings.filterwarnings("ignore")
 ```
 
