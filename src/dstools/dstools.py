@@ -210,7 +210,7 @@ class DStools:
         return features
 
     @staticmethod
-    def processOutliers(xdata, transform=True, plot=True):
+    def processOutliers(xdata, transform=True, iqm=2.2, plot=True):
         """
         Data frame is expeced to be containing numeric columns
         Detect, list and optionally remove outliers for a given data frame.
@@ -231,7 +231,7 @@ class DStools:
             pdwn = xdata.loc[:, feature].describe()[4]
             pup = xdata.loc[:, feature].describe()[6]
             # Using the interquartile range to calculate an outlier step (2.2 times the interquartile range)
-            step = 2.2 * (pup - pdwn)  # IQR * 2.2
+            step = iqm * (pup - pdwn)  # IQR * 2.2
 
             #pdwn = np.percentile(log_data.loc[:, feature], 25)
             #pup = np.percentile(log_data.loc[:, feature], 75)
