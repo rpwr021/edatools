@@ -11,12 +11,19 @@ A toolkit to help with everyday data science tasks.
 
 ### Code Snippets
 
+Initialize edatools (till there is a pip package)
 ```python
-path.append('../src')
-from edatools.edatools import DStools as dst
+from os import path
+import warnings
+
+if not path.exists('./edatools'):
+    !git clone https://github.com/rpwr021/edatools.git
+
+from edatools.src.dstools.dstools import DStools as dst
 warnings.filterwarnings("ignore")
 ```
 
+and use
 
 ```python
 data = pd.read_fwf('./sample_dataset/auto-mpg.data', \
